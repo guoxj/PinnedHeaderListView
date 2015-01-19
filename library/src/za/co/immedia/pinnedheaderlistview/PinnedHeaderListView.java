@@ -33,6 +33,8 @@ public class PinnedHeaderListView extends ListView implements OnScrollListener {
     private int mCurrentSection = 0;
     private int mWidthMode;
     private int mHeightMode;
+    
+    private static PinnedHeaderListView mSelf;
 
     public PinnedHeaderListView(Context context) {
         super(context);
@@ -182,16 +184,46 @@ public class PinnedHeaderListView extends ListView implements OnScrollListener {
             } else {
                 adapter = (SectionedBaseAdapter) adapterView.getAdapter();
             }
-            int section = adapter.getSectionForPosition(rawPosition);
-            int position = adapter.getPositionInSectionForPosition(rawPosition);
+            
+            /**
+             * header view click
+             */
+            int headerCount = mSelf.getHeaderViewsCount();
+            if (headerCount > 0 && rawPosition < headerCount) {
+            	onHeaderViewClick(adapterView, view, rawPosition, id);
+            	return;
+            }
+            
+            /**
+             * footer view click
+             */
+            int footerCount = mSelf.getFooterViewsCount();
+            if (footerCount > 0 &&  rawPosition > mSelf.getAdapter().getCount() - headerCount) {
+            	onFooterViewClick(adapterView, view, rawPosition, id);
+            	return;
+            }
+            
+            /**
+             * the rawPosition include header, but the section and relative position have not;
+             * so we need minus the count when we click
+            */
+            int section = adapter.getSectionForPosition(rawPosition - headerCount);
+            int position = adapter.getPositionInSectionForPosition(rawPosition - headerCount);
 
-            if (position == -1) {
+            /**
+             * (Integer)position == null
+             */
+            if (position == -1 || (Integer)position == null) {
                 onSectionClick(adapterView, view, section, id);
             } else {
                 onItemClick(adapterView, view, section, position, id);
             }
         }
 
+        public void onHeaderViewClick(AdapterView<?> adapterView, View view, int pos, long id){};
+        
+        public void onFooterViewClick(AdapterView<?> adapterView, View view, int pos, long id){};
+        
         public abstract void onItemClick(AdapterView<?> adapterView, View view, int section, int position, long id);
 
         public abstract void onSectionClick(AdapterView<?> adapterView, View view, int section, long id);
