@@ -37,18 +37,17 @@ public class PinnedHeaderListView extends ListView implements OnScrollListener {
     private static PinnedHeaderListView mSelf;
 
     public PinnedHeaderListView(Context context) {
-        super(context);
-        super.setOnScrollListener(this);
+        this(context, null);
     }
 
     public PinnedHeaderListView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        super.setOnScrollListener(this);
+        this(context, attrs, -1);
     }
 
     public PinnedHeaderListView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         super.setOnScrollListener(this);
+        mSelf = this;
     }
 
     public void setPinHeaders(boolean shouldPin) {
