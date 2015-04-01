@@ -3,10 +3,15 @@ package za.co.immedia.pinnedheaderlistview;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 public class PinnedHeaderListView extends ListView implements OnScrollListener {
 
@@ -160,6 +165,26 @@ public class PinnedHeaderListView extends ListView implements OnScrollListener {
     public void setOnScrollListener(OnScrollListener l) {
         mOnScrollListener = l;
     }
+    
+    /**
+     * when header pinned, the header was drawn on listview,
+     * so, all event was intercept by listview, we must pass event on PinnedHeaderView
+     */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+
+    	if (mAdapter == null || !mShouldPin || mCurrentHeader == null) {
+            return super.dispatchTouchEvent(event);
+        }
+    	
+    	int y = (int) event.getY();
+    	
+    	if (y >= mCurrentHeader.getTop() && y <= mCurrentHeader.getBottom()) {
+    		return mCurrentHeader.dispatchTouchEvent(event);
+    	}
+    	
+    	return super.dispatchTouchEvent(event);
+    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -206,8 +231,8 @@ public class PinnedHeaderListView extends ListView implements OnScrollListener {
              * the rawPosition include header, but the section and relative position have not;
              * so we need minus the count when we click
             */
-            int section = adapter.getSectionForPosition(rawPosition - headerCount);
-            int position = adapter.getPositionInSectionForPosition(rawPosition - headerCount);
+            int section = adapter.getSectionForPosition(rawPosition);
+            int position = adapter.getPositionInSectionForPosition(rawPosition);
 
             /**
              * (Integer)position == null
